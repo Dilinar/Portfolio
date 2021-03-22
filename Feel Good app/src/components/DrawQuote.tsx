@@ -58,8 +58,6 @@ export function DrawQuote() {
 
     indexBoundry();
     
-    console.log(`Display index ${displayIndex}`);
-    console.log(`Quotes length ${quotes.length}`);
     return (
         <div className={classes.root}>
             {quotes.length <= 1 ?
