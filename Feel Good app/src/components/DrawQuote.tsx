@@ -9,7 +9,6 @@ import Button from '@material-ui/core/Button';
 
 const useSelector = reduxUseSelector as TypedUseSelectorHook<ReduxState>;
 
-
 const useStyles = makeStyles(() =>
     createStyles({
         root: {
@@ -25,42 +24,31 @@ export function DrawQuote() {
     const classes = useStyles();
     const dispatch = useDispatch();
     const quotes = useSelector((state: any) => state.quotes);
-    const [ displayIndex, setDisplayIndex ] = useState(Math.floor(Math.random() * quotes.length));
-    const displayQuote = quotes[displayIndex];
+    const [ displayId, setDisplayId ] = useState(null);
+    const displayQuote = quotes.find((quote: { id: string; }) => quote.id === displayId);
 
-    function handleGenerate(): any {
-        if(quotes.length <= 1) {
-            setDisplayIndex(0);
-            return;
-        }
-        const quoteIndex = (Math.floor(Math.random() * quotes.length));
-        setDisplayIndex(quoteIndex);
-        if(quoteIndex === displayIndex) {
+    if(displayId && !displayQuote) {
+        setDisplayId(null);
+    }
+
+    function handleGenerate() {
+        const index = (Math.floor(Math.random() * quotes.length));
+        const display = quotes.find((quote: string | any[]) => quotes.indexOf(quote) === index);
+        const id = display.id;
+        setDisplayId(id);
+        if(id === displayId) {
             handleGenerate();
         }
     }
 
     function handleDelete() {
-        if(quotes.length === 0) {
-            return;
-        }
-        if(quotes.length > 1) {
-            handleGenerate();
-        }
-        dispatch(deleteQuote(displayQuote.id));
+        dispatch(deleteQuote(displayId));
+        setDisplayId(null);
     }
-
-    function indexBoundry() {
-        if(displayIndex === quotes.length && quotes.length > 0) {
-            handleGenerate();
-        }
-    }
-
-    indexBoundry();
     
     return (
         <div className={classes.root}>
-            {quotes.length <= 1 ?
+            {quotes.length === 1 && displayId || quotes.length === 0 && !displayId ?
                 <Button 
                     disabled
                     variant='contained' 
@@ -89,7 +77,9 @@ export function DrawQuote() {
                     Delete quote
                 </Button>
             }
-            {quotes.length === 0 ? <p>There are no quotes to display</p> : <Quote quote={displayQuote} />}
+            {quotes.length > 0 && displayId !== null && <Quote quote={displayQuote} />}
+            {quotes.length > 0 && displayId === null && <p>No quote drawn</p>}
+            {quotes.length === 0 && <p>There are no quotes to display</p>}
         </div>
     );
 }
